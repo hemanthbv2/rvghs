@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RV Schools Chatbot — Architecture & Flow</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#eef2ff',
+                primaryTextColor: '#1e1b4b',
+                primaryBorderColor: '#6366f1',
+                lineColor: '#94a3b8',
+                secondaryColor: '#f0fdf4',
+                tertiaryColor: '#fef2f2'
+            }
+        });
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --surface-color: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --rvs-color: #2E86AB;
+            --rvps-color: #A23B72;
+            --rvghs-color: #6F62F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        .section {
+            background: var(--surface-color);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin: 30px 0 15px 0;
+            color: var(--primary);
+        }
+
+        .mermaid-wrapper {
+            background: #fafafa;
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.rvs { background: rgba(46, 134, 171, 0.1); color: var(--rvs-color); border: 1px solid rgba(46, 134, 171, 0.2); }
+        .badge.rvps { background: rgba(162, 59, 114, 0.1); color: var(--rvps-color); border: 1px solid rgba(162, 59, 114, 0.2); }
+        .badge.rvghs { background: rgba(111, 98, 240, 0.1); color: var(--rvghs-color); border: 1px solid rgba(111, 98, 240, 0.2); }
+        .badge.neutral { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .badge.danger { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
+
+        .rules-list {
+            list-style: none;
+        }
+
+        .rules-list li {
+            padding: 16px;
+            background: #f8fafc;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 12px;
+            border-radius: 0 8px 8px 0;
+            font-weight: 500;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-color);
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        code {
+            font-family: monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #b91c1c;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>RV Schools Chatbot Architecture</h1>
+            <p class="subtitle">Comprehensive Flowchart & Decision Tree System Documentation</p>
+        </header>
+
+        <!-- SECTION 1: SYSTEM FLOWCHARTS -->
+        <div class="section">
+            <h2>📐 1. System Flowcharts</h2>
+            <p style="margin-bottom: 20px; color: var(--text-muted);">The chatbot supports distinct decision trees for three different institutions, driven by the <code>schoolId</code> context.</p>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('rvghs')">RV Girls High School (RVGHS)</button>
+                <button class="tab-btn" onclick="showTab('rvps')">RV Public School (RVPS)</button>
+                <button class="tab-btn" onclick="showTab('rvs')">RV School (RVS)</button>
+            </div>
+
+            <!-- RVGHS Tab -->
+            <div id="tab-rvghs" class="tab-content active">
+                <div class="mermaid-wrapper">
+                    <div class="mermaid">
+                        flowchart TD
+                            %% Styling
+                            classDef startNode fill:#e0e7ff,stroke:#6366f1,stroke-width:2px,color:#312e81;
+                            classDef menuNode fill:#c7d2fe,stroke:#4f46e5,stroke-width:2px,color:#312e81;
+                            classDef flowNode fill:#ffffff,stroke:#94a3b8,stroke-width:1px,color:#334155;
+
+                            Start([💬 Welcome to RVGHS]) :::startNode --> Menu["Main Menu"] :::menuNode
+
+                            Menu --> Admissions["📚 Admissions"] :::flowNode
+                            Menu --> About["🏫 About the School"] :::flowNode
+                            Menu --> Academics["📖 Academics"] :::flowNode
+                            Menu --> Fees["💰 Fee Structure"] :::flowNode
+                            Menu --> Midday["🍱 Mid-day Meals"] :::flowNode
+                            Menu --> Clubs["🎯 Clubs & Beyond"] :::flowNode
+                            Menu --> Facilities["🏗️ Facilities"] :::flowNode
+                            Menu --> Results["📊 Results"] :::flowNode
+                            Menu --> Calendar["📅 Academic Calendar"] :::flowNode
+                            Menu --> Contact["📞 Contact Us"] :::flowNode
+
+                            Admissions --> AdmDocs["📋 Required Documents"] :::flowNode
+                            Admissions --> AdmCall["📞 Contact Admissions"] :::flowNode
+
+                            About --> Alumni["🎓 Alumni Network"] :::flowNode
+                            About --> Donate["❤️ Donate"] :::flowNode
+                            
+                            %% Back links
+                            AdmDocs -.-> Menu
+                            AdmCall -.-> Menu
+                            Alumni -.-> Menu
+                            Donate -.-> Menu
+                            Academics -.-> Menu
+                            Fees -.-> Menu
+                            Midday -.-> Menu
+                            Clubs -.-> Menu
+                            Facilities -.-> Menu
+                            Results -.-> Menu
+                            Calendar -.-> Menu
+                            Contact -.-> Menu
+                    </div>
+                </div>
+            </div>
+
+            <!-- RVPS Tab -->
+            <div id="tab-rvps" class="tab-content">
+                <div class="mermaid-wrapper">
+                    <div class="mermaid">
+                        flowchart TD
+                            classDef startNode fill:#fce7f3,stroke:#ec4899,stroke-width:2px,color:#831843;
+                            classDef menuNode fill:#fbcfe8,stroke:#db2777,stroke-width:2px,color:#831843;
+                            classDef flowNode fill:#ffffff,stroke:#94a3b8,stroke-width:1px,color:#334155;
+
+                            Start([💬 Welcome to RVPS (ICSE)]) :::startNode --> Menu["Main Menu"] :::menuNode
+
+                            Menu --> Admissions["📚 Admissions"] :::flowNode
+                            Menu --> About["🏫 About the School"] :::flowNode
+                            Menu --> Academics["📖 Academics"] :::flowNode
+                            Menu --> Facilities["🏗️ Facilities"] :::flowNode
+                            Menu --> Contact["📞 Contact Us"] :::flowNode
+                            Menu --> Transport["🚌 Transport / Bus"] :::flowNode
+                            Menu --> Toppers["🏆 Toppers"] :::flowNode
+                            Menu --> FAQ["❓ FAQs"] :::flowNode
+
+                            Admissions --> AdmApply["🔗 Apply Now"] :::flowNode
+                            Admissions --> AdmCall["📞 Contact Admissions"] :::flowNode
+
+                            About --> Facilities
+                            About --> Toppers
+
+                            Academics --> Toppers
+                            Academics --> Houses["🏠 Houses"] :::flowNode
+                            
+                            FAQ --> FAQIcse["📘 What is ICSE?"] :::flowNode
+                            FAQ --> FAQBen["✅ Benefits of ICSE"] :::flowNode
+                            FAQ --> FAQTime["🕐 School Timings"] :::flowNode
+                            FAQ --> FAQTrans["🚌 Transport Info"] :::flowNode
+                            FAQ --> FAQFood["🥗 Food Policy"] :::flowNode
+                            
+                            FAQIcse --> FAQBen
+                    </div>
+                </div>
+            </div>
+
+            <!-- RVS Tab -->
+            <div id="tab-rvs" class="tab-content">
+                <div class="mermaid-wrapper">
+                    <div class="mermaid">
+                        flowchart TD
+                            classDef startNode fill:#e0f2fe,stroke:#0ea5e9,stroke-width:2px,color:#0c4a6e;
+                            classDef menuNode fill:#bae6fd,stroke:#0284c7,stroke-width:2px,color:#0c4a6e;
+                            classDef flowNode fill:#ffffff,stroke:#94a3b8,stroke-width:1px,color:#334155;
+
+                            Start([💬 Welcome to RV School]) :::startNode --> Menu["Main Menu"] :::menuNode
+
+                            Menu --> Admissions["📚 Admissions"] :::flowNode
+                            Menu --> About["🏫 About the School"] :::flowNode
+                            Menu --> Academics["📖 Academics"] :::flowNode
+                            Menu --> Fees["💰 Fee Structure"] :::flowNode
+                            Menu --> Facilities["🏗️ Facilities"] :::flowNode
+                            Menu --> Contact["📞 Contact Us"] :::flowNode
+                            Menu --> Inclusive["♿ Inclusive Education"] :::flowNode
+
+                            Admissions --> AdmApply["🔗 Apply Now"] :::flowNode
+                            Admissions --> AdmCall["📞 Contact Admissions"] :::flowNode
+
+                            About --> Mgmt["👥 Management"] :::flowNode
+                            About --> Inclusive
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: FLOW BREAKDOWN -->
+        <div class="section">
+            <h2>🔄 2. Flow Breakdown & Node Logic</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Flow Topic</th>
+                        <th>Applicable Schools</th>
+                        <th>Core Function / Content Provided</th>
+                        <th>Exit Path</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Admissions</strong></td>
+                        <td><span class="badge rvs">RVS</span> <span class="badge rvps">RVPS</span> <span class="badge rvghs">RVGHS</span></td>
+                        <td>Provides application links (SAP Portal for RVS/RVPS), admission guidelines, and required documents (RVGHS).</td>
+                        <td>Back to Menu</td>
+                    </tr>
+                    <tr>
+                        <td><strong>About / Academics</strong></td>
+                        <td><span class="badge rvs">RVS</span> <span class="badge rvps">RVPS</span> <span class="badge rvghs">RVGHS</span></td>
+                        <td>Details foundation year, syllabus (State Board vs ICSE), management structure, and academic focus.</td>
+                        <td>Specific Sub-menus / Back to Menu</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fee Structure</strong></td>
+                        <td><span class="badge rvs">RVS</span> <span class="badge rvghs">RVGHS</span></td>
+                        <td>Directs users to contact the school office to prevent misquoting fees online.</td>
+                        <td>Back to Menu</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interactive FAQs</strong></td>
+                        <td><span class="badge rvps">RVPS</span></td>
+                        <td>Deep-dive into ICSE curriculum benefits, timings, food policy (strictly veg), and transport.</td>
+                        <td>Back to FAQs / Back to Menu</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Specialized Nodes</strong></td>
+                        <td>Specific</td>
+                        <td>
+                            • <em>Inclusive Education</em> <span class="badge rvs">RVS</span><br>
+                            • <em>Mid-day Meals & Clubs</em> <span class="badge rvghs">RVGHS</span><br>
+                            • <em>Houses & Toppers</em> <span class="badge rvps">RVPS</span>
+                        </td>
+                        <td>Back to Menu</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SECTION 3: KEYWORD NLP -->
+        <div class="section">
+            <h2>🔍 3. Free-Text Keyword Matching (NLP)</h2>
+            <p style="margin-bottom: 20px; color: var(--text-muted);">The bot utilizes a hardcoded dictionary mapping user input substrings to specific decision tree nodes, enabling a pseudo-AI conversational experience.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Trigger Node</th>
+                        <th>Target Keywords (Substrings)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge neutral">admissions</span></td>
+                        <td><code>admission</code>, <code>apply</code>, <code>enroll</code>, <code>registration</code>, <code>join</code>, <code>seat</code></td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge neutral">fees</span></td>
+                        <td><code>fee</code>, <code>cost</code>, <code>price</code>, <code>payment</code>, <code>amount</code></td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge neutral">contact</span></td>
+                        <td><code>phone</code>, <code>email</code>, <code>address</code>, <code>location</code>, <code>map</code>, <code>human</code>, <code>speak</code></td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge neutral">faq_timings</span></td>
+                        <td><code>uniform</code>, <code>dress</code>, <code>timing</code>, <code>schedule</code>, <code>hour</code></td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge neutral">midday</span></td>
+                        <td><code>meal</code>, <code>lunch</code>, <code>food</code>, <code>canteen</code>, <code>tiffin</code>, <code>akshaya</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SECTION 4: CONTENT MODERATION -->
+        <div class="section">
+            <h2>🛡️ 4. Content Moderation & Security</h2>
+            <p style="margin-bottom: 20px; color: var(--text-muted);">A built-in Regex-based content moderation engine strictly prevents the bot from engaging in inappropriate topics.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Description / Example Triggers</th>
+                        <th>Bot System Response</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge danger">Abusive</span></td>
+                        <td>Profanity, harassment, violence, explicit terms.</td>
+                        <td>"I'm unable to respond to inappropriate language. Please keep our conversation respectful."</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge danger">Conspiracy</span></td>
+                        <td>Political, fake news, unverified claims (e.g., 'illuminati', 'flat earth').</td>
+                        <td>"I'm designed to provide factual info about the school only. I cannot engage with unverified claims."</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge danger">Private Data</span></td>
+                        <td>Queries about student marks, teacher salaries, personal phone numbers, or passwords.</td>
+                        <td>"I cannot share personal or confidential information about students, faculty, or staff."</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SECTION 5: GLOBAL RULES -->
+        <div class="section">
+            <h2>🎯 5. Global System Rules</h2>
+            <ul class="rules-list">
+                <li><strong>Rules-Based Execution:</strong> The system relies entirely on predefined decision trees and keyword maps. No generative AI or external API calls are made for responses, guaranteeing 100% brand-safe answers.</li>
+                <li><strong>Institution Context Switch:</strong> A single codebase powers three separate school chatbots by dynamically injecting the data model (<code>SCHOOLS</code> object) based on the URL context or initialization parameter.</li>
+                <li><strong>Graceful Fallback:</strong> If free-text input does not match any keyword, the bot politely apologizes and re-presents the Main Menu buttons to guide the user back into the flow.</li>
+                <li><strong>Local Telemetry:</strong> Chat interactions, unmatched queries, and feedback are logged locally (<code>rvce_standalone_logs</code>) to help administrators identify missing keywords and improve the bot over time.</li>
+                <li><strong>Contact Deflection:</strong> Pricing/Fee structures are intentionally withheld from the bot to drive warm leads directly to the admissions office via phone or email.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        function showTab(school) {
+            // Remove active class from all buttons and contents
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to target
+            event.target.classList.add('active');
+            document.getElementById('tab-' + school).classList.add('active');
+        }
+    </script>
+</body>
+</html>
