@@ -120,7 +120,7 @@ const SCHOOLS = {
     grades: 'High School (Girls Only)',
     headmaster: 'Mr. Devaru Bhat',
     students: '~400',
-    phone: '080-2657 7792',
+    phone: '9036876165',
     mobile: '+91-9036876165',
     email: 'rvghs@rvei.edu.in',
     address: 'RV Teachers College Building, 15, Ashoka Pillar Road, 2nd Block, Jayanagar, Bengaluru - 560011',
@@ -145,18 +145,18 @@ const SCHOOLS = {
     clubs: ['Student Union Club', 'Humanities Club', 'Electoral Literacy Club', 'Science Club', 'Sanskrit Club', 'Kannada Sangha', 'Health Club', 'Eco Club', 'NCC', 'Sports Club', 'Bugle Band Set', 'Girl Guide'],
     competitiveExams: 'NMMS, CHARD GK, Hindi/Sanskrit exams, Ramayana & Mahabharata exams — up to ₹12,000 financial aid',
     admissionDocs: [
-      'Original SATS Transfer Certificate (with PEN & Aadhaar)',
-      'Passport-size photograph',
-      'Birth Certificate (photocopy)',
-      'Previous class Marks Card (photocopy)',
-      'Bhagyalakshmi Bond (photocopy, if applicable)',
-      'DISE number from previous school',
-      'Caste Certificate (photocopy)',
-      'Parent\'s Income Certificate (photocopy)',
-      'Student & Parents Aadhaar Cards (photocopy)',
-      'Student Bank Passbook front page (photocopy)',
-      'BPL Card (photocopy, if applicable)',
-      'DDPI Permission Order (if Central → State syllabus)',
+      'Original SATS Transfer Certificate (with PEN number and AAPAR Id)',
+      'One passport-size photograph of the student',
+      'Photocopy of the student\'s Birth Certificate',
+      'Photocopy of the previous class Marks Card',
+      'Photocopy of the student\'s Bhagyalakshmi Bond',
+      'DISE number from the previous school',
+      'Photocopy of the student\'s Caste Certificate',
+      'Photocopy of the parent\'s Income Certificate',
+      'Photocopy of the student\'s and parents\' Aadhar Cards',
+      'Photocopy of the student\'s Bank Passbook (front page)',
+      'If the student is transferring from Central to State syllabus, a Permission Order from the DDPI Office, Bengaluru South, is required.',
+      'Photocopy of the BPL (Below Poverty Line) Card, if applicable',
     ],
     academicCalendar: [
       { event: 'FA 1', month: 'July 2025' },
@@ -199,8 +199,11 @@ function buildTree(s) {
       base.push({ label: '❓ FAQs', node: 'faq' });
     }
     if (schoolId === 'rvghs') {
+      base.splice(4, 0, { label: '💰 Fee Structure', node: 'fees' });
       base.push({ label: '🍱 Mid-day Meals', node: 'midday' });
-      base.push({ label: '🛡️ NCC', node: 'ncc' });
+      base.push({ label: '🎯 Clubs & Beyond Academics', node: 'clubs' });
+      base.push({ label: '📊 Results', node: 'results' });
+      base.push({ label: '📅 Academic Calendar', node: 'calendar' });
     }
     if (schoolId === 'rvs') {
       base.splice(4, 0, { label: '💰 Fee Structure', node: 'fees' });
@@ -399,7 +402,7 @@ function buildTree(s) {
         options: mainMenuOptions('rvghs'),
       },
       admissions: {
-        message: `📚 Admissions\n\nRVGHS welcomes girls to be part of a nurturing academic environment.\n\n🔗 [Visit Admissions Page](${s.admissionLink})`,
+        message: `📚 Admissions\n\nRVGHS welcomes girls to be part of a nurturing academic environment.`,
         options: [
           { label: '📋 Required Documents', node: 'adm_docs' },
           { label: '📞 Contact Admissions', node: 'adm_call' },
@@ -407,15 +410,15 @@ function buildTree(s) {
         ],
       },
       adm_docs: {
-        message: `📋 Required Documents:\n\n${s.admissionDocs.map((d, i) => `${i+1}. ${d}`).join('\n')}\n\n🔗 [Visit Admissions Page](${s.admissionLink})`,
+        message: `📋 Required Documents:\n\n${s.admissionDocs.map((d, i) => `${i+1}. ${d}`).join('\n')}`,
         options: [backOption],
       },
       adm_call: {
-        message: `📞 Admissions Contact\n\n📞 ${s.phone}\n📧 ${s.email}\n\n🔗 [Visit Admissions Page](${s.admissionLink})`,
+        message: `📞 Admissions Contact\n\n📞 ${s.phone}\n📧 ${s.email}`,
         options: [backOption],
       },
       about: {
-        message: `🏫 About RVGHS\n\nFounded in 1962, RVGHS is a State Board school dedicated to educating and empowering women.\n\n🔗 [Visit About Us Page](${s.website}/about_rvghs/)`,
+        message: `🏫 About RVGHS\n\nFounded in 1962, RVGHS is a State Board school dedicated to educating and empowering women.`,
         options: [
           { label: '🎓 Alumni Network', node: 'alumni' },
           { label: '❤️ Donate', node: 'donate' },
@@ -423,31 +426,43 @@ function buildTree(s) {
         ],
       },
       alumni: {
-        message: `🎓 Alumni Network\n\nConnect on AlmaConnect: ${s.alumniPortal}\n\n🔗 [Visit Alumni Page](${s.website}/alumni/)`,
+        message: `🎓 Alumni Network\n\nConnect on AlmaConnect: ${s.alumniPortal}`,
         options: [backOption],
       },
       donate: {
-        message: `❤️ Donate\n\nSupport girls' education: ${s.donateLink}\n\n🔗 [Visit Donation Page](${s.donateLink})`,
+        message: `❤️ Donate\n\nSupport girls' education: ${s.donateLink}`,
         options: [backOption],
       },
       academics: {
-        message: `📖 Academics\n\nWe offer Karnataka State Board syllabus with multiple language sections.\n\n🔗 [Visit Academics Page](${s.website}/subjects/)`,
-        options: [backOption],
-      },
-      facilities: {
-        message: `🏗️ Facilities\n\nOur campus includes an auditorium, computer lab, and library.\n\n🔗 [Visit Infrastructure Page](${s.website}/infrastructure/)`,
+        message: `📖 Academics\n\nWe offer Karnataka State Board syllabus with multiple language sections.`,
         options: [backOption],
       },
       midday: {
-        message: `🍱 Mid-day Meal\n\nWe provide nutritious Government mid-day meals via Akshaya Patra Foundation.\n\n🔗 [Visit Infrastructure Page](${s.website}/infrastructure/)`,
+        message: `🍱 Mid-day Meal\n\nWe provide nutritious Government mid-day meals via Akshaya Patra Foundation.`,
         options: [backOption],
       },
-      ncc: {
-        message: `🛡️ NCC\n\nLearn more about our National Cadet Corps (NCC) programs and activities.\n\n🔗 [Visit Clubs Page](${s.website}/clubs/)`,
+      clubs: {
+        message: `🎯 Clubs\n\nWe have 12 active clubs including Science, Eco, and Literary clubs.`,
+        options: [backOption],
+      },
+      facilities: {
+        message: `🏗️ Facilities\n\nOur campus includes an auditorium, computer lab, and library.`,
+        options: [backOption],
+      },
+      results: {
+        message: `📊 Results\n\nView results at our school office.`,
+        options: [backOption],
+      },
+      calendar: {
+        message: `📅 Calendar\n\nPlease check our website or contact the office for the calendar.`,
+        options: [backOption],
+      },
+      fees: {
+        message: `💰 Fees\n\nFor fee details, contact:\n📞 ${s.phone}`,
         options: [backOption],
       },
       contact: {
-        message: `📞 Contact RVGHS\n\n📍 ${s.address}\n📞 ${s.phone}\n📧 ${s.email}\n🌐 [Visit Contact Page](${s.website}/contact_us/)`,
+        message: `📞 Contact RVGHS\n\n📍 ${s.address}\n📞 ${s.phone}\n📧 ${s.email}\n🌐 [Visit Website](${s.website})`,
         options: [backOption],
       },
     };
@@ -683,8 +698,10 @@ function openChat(schoolId) {
 
   // Send welcome after brief delay
   setTimeout(() => {
+    const hs = document.getElementById('rvghs-hero-screen');
+    if (hs) hs.classList.add('fade-out');
     sendBotMessage('welcome');
-  }, 400);
+  }, 3000);
 }
 
 // ── Close chat ──
@@ -709,9 +726,38 @@ function formatText(text) {
 }
 
 // ── Create message element ──
-function createMessage(text, type) {
+function createMessage(text, type, isSuccess = false) {
   const msgDiv = document.createElement('div');
   msgDiv.className = `message ${type}`;
+
+  if (type === 'bot') {
+    const avatar = document.createElement('div');
+    const img = document.createElement('img');
+    img.alt = 'Bot';
+    
+    if (isSuccess) {
+      avatar.className = 'avatar';
+      img.src = 'mascot_success_v2.png';
+      img.className = 'full-body-avatar';
+      // Revert back to normal avatar after a few seconds
+      setTimeout(() => {
+        img.src = 'mascot_v2.png';
+        img.className = 'full-body-avatar';
+      }, 2500);
+    } else {
+      avatar.className = 'avatar';
+      img.src = 'mascot_v2.png';
+      img.className = 'full-body-avatar';
+    }
+    
+    avatar.appendChild(img);
+    msgDiv.appendChild(avatar);
+  } else {
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.innerHTML = `<span style="font-size: 16px;">👤</span>`;
+    msgDiv.appendChild(avatar);
+  }
 
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
@@ -756,10 +802,15 @@ function createTypingIndicator() {
   div.className = 'typing-indicator';
   div.id = 'typingIndicator';
 
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  avatar.innerHTML = `<img src="mascot_thinking_v2.png" alt="Thinking" class="full-body-thinking">`;
+
   const dots = document.createElement('div');
   dots.className = 'dots';
   dots.innerHTML = '<span></span><span></span><span></span>';
 
+  div.appendChild(avatar);
   div.appendChild(dots);
   return div;
 }
@@ -799,7 +850,7 @@ function sendBotMessage(nodeId, isBack = false) {
   setTimeout(() => {
     typing.remove();
 
-    const msg = createMessage(node.message, 'bot');
+    const msg = createMessage(node.message, 'bot', true);
     chatContainer.appendChild(msg);
     logInteraction('bot_message', node.message);
 
@@ -944,7 +995,25 @@ $$('.school-card').forEach(card => {
 // Chat launcher clicks
 if (chatLauncher) {
   chatLauncher.addEventListener('click', () => {
-    chatWidget.classList.add('active');
+    const mascotImg = document.getElementById('launcherMascotImg');
+    if (chatWidget.classList.contains('active')) {
+      // If it's already open, close it
+      chatWidget.classList.remove('active');
+    } else if (mascotImg) {
+      // If closed, show thinking animation then open
+      mascotImg.src = 'mascot_thinking_v2.png';
+      mascotImg.classList.add('thinking-zoom');
+      setTimeout(() => {
+        mascotImg.src = 'mascot_v2.png';
+        mascotImg.classList.remove('thinking-zoom');
+        if (!currentSchool) openChat('rvghs');
+        else chatWidget.classList.add('active');
+      }, 500);
+    } else {
+      // Fallback if no mascot image found
+      if (!currentSchool) openChat('rvghs');
+      else chatWidget.classList.add('active');
+    }
   });
 }
 
@@ -960,10 +1029,15 @@ if (closeChatBtn) {
 clearChatBtn.addEventListener('click', () => {
   if (currentTree) {
     chatContainer.innerHTML = '';
+    const hs = document.getElementById('rvghs-hero-screen');
+    if (hs) hs.classList.remove('fade-out');
     SESSION.navStack = [];
     SESSION.pendingOverflows = [];
     SafeStorage.removeItem(currentSchool.id + '_chat_html');
-    setTimeout(() => sendBotMessage('welcome'), 300);
+    setTimeout(() => {
+      if (hs) hs.classList.add('fade-out');
+      sendBotMessage('welcome');
+    }, 3000);
   }
 });
 
@@ -1071,3 +1145,4 @@ document.querySelectorAll('.suggestion-chip').forEach(c => c.addEventListener('c
 document.addEventListener('DOMContentLoaded', () => {
     openChat('rvghs');
 });
+
