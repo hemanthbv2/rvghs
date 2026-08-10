@@ -131,7 +131,7 @@ const SCHOOLS = {
     donateLink: 'https://www.rvinstitutions.com/donate/',
     transport: false,
     midDayMeal: true,
-    midDayMealDetails: 'Akshaya Patra Foundation provides nutritious meals (incl. milk/ragi malt). Daily Supplementary Nutritious Food (eggs, chikki, or bananas) provided by Azim Premji Foundation & Department of Education.',
+    midDayMealDetails: 'ISKCON Akshaya Patra Foundation provides nutritious meals (incl. milk/ragi malt). Daily Supplementary Nutritious Food (eggs, chikki, or bananas) provided by Azim Premji Foundation & Department of Education.',
     ncc: true,
     officeHours: 'Mon–Fri: 9:00 AM – 4:30 PM | Sat: 9:00 AM – 1:00 PM',
     facilities: ['Science Laboratory', 'Computer Lab (networked campus)', 'Library (with LCD projector)', 'Audio-Visual Room', 'Sports Room + Playground', 'AC Auditorium (500+ seats)', 'Canteen'],
@@ -438,7 +438,7 @@ function buildTree(s) {
         options: [backOption],
       },
       midday: {
-        message: `🍱 Mid-day Meal\n\nWe provide nutritious Government mid-day meals via Akshaya Patra Foundation.`,
+        message: `🍱 Mid-day Meal\n\nWe provide nutritious Government mid-day meals via ISKCON Akshaya Patra Foundation.`,
         options: [backOption],
       },
       clubs: {
@@ -565,7 +565,7 @@ const KEYWORD_MAP = [
   { keywords: ['academic', 'subject', 'syllabus', 'curriculum', 'board', 'study'], node: 'academics' },
   { keywords: ['facility', 'facilities', 'infrastructure', 'lab', 'library', 'auditorium', 'playground', 'campus'], node: 'facilities' },
   { keywords: ['bus', 'transport', 'route', 'pick', 'drop'], node: 'transport' },
-  { keywords: ['meal', 'lunch', 'food', 'mid-day', 'midday', 'canteen', 'tiffin', 'akshaya'], node: 'midday' },
+  { keywords: ['meal', 'lunch', 'food', 'mid-day', 'midday', 'canteen', 'tiffin', 'akshaya', 'iscon', 'iskcon'], node: 'midday' },
   { keywords: ['club', 'ncc', 'guide', 'bugle', 'extracurricular', 'extra', 'activity', 'beyond'], node: 'clubs' },
   { keywords: ['result', 'topper', 'marks', 'pass', 'percentage', 'score'], node: 'toppers' },
   { keywords: ['uniform', 'dress', 'timing', 'time', 'schedule', 'hour', 'when'], node: 'faq_timings' },
