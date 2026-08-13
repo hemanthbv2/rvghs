@@ -530,16 +530,44 @@ function logInteraction(type, content) {
         q = '[Feedback] ' + content;
     }
 
-    logs.push({ 
+    const logData = { 
         s: sid, 
         q: q, 
         i: i, 
         d: new Date().toISOString(), 
         t: t 
-    });
+    };
+    logs.push(logData);
 
     if(logs.length > 1000) logs.shift();
     localStorage.setItem('rvce_standalone_logs', JSON.stringify(logs));
+
+    // Dual-write Telemetry
+    const wpRestUrl = window.rvghs_wp_url || 'http://localhost/wp-json/rvghs-chatbot/v1/log';
+    const vercelUrl = window.rvghs_vercel_url || 'http://localhost:5000/api/logs';
+
+    // 1. Write to WordPress
+    fetch(wpRestUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(logData)
+    }).catch(err => console.error('WP Telemetry Error:', err));
+
+    // 2. Write to Vercel/MongoDB (Multi-Tenant Format)
+    const multiTenantPayload = {
+        institute_id: 'rvghs',
+        api_key: 'rvghs_key_12345',
+        sessionId: sid,
+        events: [{
+            eventType: t,
+            data: { intent: i, query: q }
+        }]
+    };
+    fetch(vercelUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(multiTenantPayload)
+    }).catch(err => console.error('Vercel Telemetry Error:', err));
 }
 
 function matchKeywordsMultiple(text, tree) {

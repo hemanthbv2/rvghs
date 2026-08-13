@@ -189,7 +189,16 @@ tr:last-child td { border-bottom:none; }
 let currentData = [];
 let currentKeyword = '';
 
-function getLogs(){ return JSON.parse(localStorage.getItem('rvce_standalone_logs')||'[]'); }
+const API_BASE = 'http://localhost:5000/api';
+
+async function getLogs() {
+    try {
+        const res = await fetch(`${API_BASE}/logs`);
+        const data = await res.json();
+        if(data.ok) return data.logs;
+    } catch(err) { console.error(err); }
+    return [];
+}
 
 function applyFilter(kw) {
     document.getElementById('searchInput').value = kw;
@@ -202,7 +211,7 @@ function handleSearch(e) {
     }
 }
 
-function analyzeKeyword(kw) {
+async function analyzeKeyword(kw) {
     kw = kw.toLowerCase().trim();
     if (!kw) {
         document.getElementById('resultsArea').style.display = 'none';
@@ -211,7 +220,7 @@ function analyzeKeyword(kw) {
     }
     
     currentKeyword = kw;
-    const rawLogs = getLogs();
+    const rawLogs = await getLogs();
     
     // Consider only valid keywords (messages with a known intent) and clicks
     const logs = rawLogs.filter(l => {
@@ -311,11 +320,11 @@ function analyzeKeyword(kw) {
         }
     });
 
-    const formatList = (counts, containerId) => {
+    const formatList = (counts, containerId, logs) => {
         const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0, 10);
         const el = document.getElementById(containerId);
-        if (sorted.length === 0) {
-            el.innerHTML = '<div style="color:var(--dim); font-style:italic; font-size:12px; text-align:center; padding:10px;">No specific flow data recorded.</div>';
+        if (!logs || logs.length === 0) {
+            el.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding: 40px;">No intent logs available yet. Start chatting to see analysis.</div>';
             return;
         }
         

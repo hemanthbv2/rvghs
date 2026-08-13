@@ -250,7 +250,16 @@ const TOPICS = {
 };
 const IC = {message:'💬',click:'🖱️',ui:'⚙️',hover:'👆',copy:'📋',typing:'⌨️',scroll:'📜',dwell:'⏱️',focus:'🎯',blur:'💤',visibility:'👁️',session:'🔌'};
 
-function getLogs(){ return JSON.parse(localStorage.getItem('rvce_standalone_logs')||'[]'); }
+const API_BASE = 'http://localhost:5000/api';
+
+async function getLogs() {
+    try {
+        const res = await fetch(`${API_BASE}/logs`);
+        const data = await res.json();
+        if(data.ok) return data.logs;
+    } catch (err) { console.error(err); }
+    return [];
+}
 
 function classify(l){
     let text = ((l.q||'')+ ' '+(l.i||'')).toLowerCase();
@@ -262,8 +271,8 @@ function classify(l){
     return null;
 }
 
-function render(){
-    const logs = getLogs();
+async function render(){
+    const logs = await getLogs();
     renderChips(logs);
     renderRanking(logs);
     renderChart(logs);

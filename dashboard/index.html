@@ -430,8 +430,17 @@
             'session': '🔌'
         };
 
-        function render() {
-            const allLogs = JSON.parse(localStorage.getItem('rvce_standalone_logs') || '[]');
+        const API_BASE = 'http://localhost:5000/api';
+
+        async function render() {
+            let allLogs = [];
+            try {
+                const res = await fetch(`${API_BASE}/logs`);
+                const data = await res.json();
+                if(data.ok) allLogs = data.logs;
+            } catch (err) {
+                console.error('Fetch error:', err);
+            }
             let logs = [...allLogs];
             
             const filterDate = document.getElementById('dateFilter').value;
@@ -603,8 +612,13 @@
             render();
         }
 
-        function exportCSV() {
-            const logs = JSON.parse(localStorage.getItem('rvce_standalone_logs') || '[]');
+        async function exportCSV() {
+            let logs = [];
+            try {
+                const res = await fetch(`${API_BASE}/logs`);
+                const data = await res.json();
+                if(data.ok) logs = data.logs;
+            } catch (err) { console.error(err); }
             if(!logs.length) { alert('No data to export!'); return; }
             
             const data = logs.map(l => ({
@@ -623,9 +637,9 @@
             XLSX.writeFile(wb, `rvce_chatbot_logs_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
 
-        function clearAllData() {
+        async function clearAllData() {
             if (confirm("Reset all intelligence data?")) {
-                localStorage.removeItem('rvce_standalone_logs');
+                await fetch(`${API_BASE}/logs`, { method: 'DELETE' });
                 render();
             }
         }
@@ -656,8 +670,11 @@
                 { s: sid, q: "[dwell] Chat open for 95s", i: "dwell:Chat open for 95s", d: ts(5000), t: 'interaction', m: { seconds: 95 } },
                 { s: sid, q: "[session] Page Unload", i: "session:Page Unload", d: ts(1000), t: 'interaction' },
             ];
-            const existing = JSON.parse(localStorage.getItem('rvce_standalone_logs') || '[]');
-            localStorage.setItem('rvce_standalone_logs', JSON.stringify([...existing, ...mock]));
+            await fetch(`${API_BASE}/logs/batch`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ logs: mock })
+            });
             render();
         }
 
@@ -767,20 +784,15 @@
                             <span style="flex-grow:1; margin-right:10px;">❓ "${l.q}"</span>
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span class="uq-time" style="margin-left:0;">${time}</span>
-                                <button class="btn" style="padding:4px 8px; font-size:10px; background:rgba(16,185,129,0.1); color:var(--success); border-color:var(--success);" onclick="resolveQuestion('${l.d}')">✅ Resolve</button>
+                                <button class="btn" style="padding:4px 8px; font-size:10px; background:rgba(16,185,129,0.1); color:var(--success); border-color:var(--success);" onclick="resolveQuestion('${l._id}')">✅ Resolve</button>
                             </div>
                         </div>`;
             }).join('');
         }
 
-        function resolveQuestion(timestamp) {
-            const existing = JSON.parse(localStorage.getItem('rvce_standalone_logs') || '[]');
-            const logIdx = existing.findIndex(l => l.d === timestamp);
-            if (logIdx !== -1) {
-                existing[logIdx].resolved = true;
-                localStorage.setItem('rvce_standalone_logs', JSON.stringify(existing));
-                render();
-            }
+        async function resolveQuestion(id) {
+            await fetch(`${API_BASE}/logs/${id}/resolve`, { method: 'PATCH' });
+            render();
         }
 
         function renderModerated(logs) {
