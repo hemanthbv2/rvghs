@@ -3,7 +3,7 @@
  * Plugin Name: RVGHS Chatbot
  * Plugin URI: https://rvghs.edu.in
  * Description: Interactive AI Chatbot for RV Girls High School with Dual-Write Telemetry (WordPress MySQL + Vercel MongoDB Command Center).
- * Version: 2.5.0
+ * Version: 3.0.0
  * Author: Hemanth BV
  * Author URI: https://rvghs.edu.in
  * License: GPL-2.0+
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Constants
-define('RVGHS_CHATBOT_VERSION', '2.5.0');
+define('RVGHS_CHATBOT_VERSION', '3.0.0');
 define('RVGHS_CHATBOT_DIR_PATH', plugin_dir_path(__FILE__));
 define('RVGHS_CHATBOT_DIR_URL', plugin_dir_url(__FILE__));
 
@@ -574,6 +574,23 @@ function rvghs_chatbot_rest_log_batch($request) {
             'query_text'     => $queryText,
             'meta_data'      => wp_json_encode($data),
             'created_at'     => current_time('mysql', 1)
+        ));
+    }
+
+    // Forward to Vercel MongoDB backend if configured or default
+    $saved_vercel = get_option('rvghs_chatbot_vercel_url', '');
+    $vercel_url = !empty($saved_vercel) ? $saved_vercel : 'https://chatbot-dashboard-sage.vercel.app';
+    if (!empty($vercel_url)) {
+        $vercel_endpoint = rtrim($vercel_url, '/') . '/api/logs';
+        wp_remote_post($vercel_endpoint, array(
+            'headers'     => array('Content-Type' => 'application/json'),
+            'body'        => wp_json_encode(array(
+                'institute_id' => 'rvghs',
+                'sessionId'    => $session_id,
+                'events'       => $events
+            )),
+            'timeout'     => 3,
+            'blocking'    => false
         ));
     }
 

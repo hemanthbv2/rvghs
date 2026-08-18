@@ -159,7 +159,7 @@ const SCHOOLS = {
     coreSubjects: ['Mathematics', 'General Science', 'Social Science'],
     coCurricular: ['Physical Education', 'Craft & SUPW', 'Computer Education'],
     clubs: ['Student Union Club', 'Humanities Club', 'Electoral Literacy Club', 'Science Club', 'Sanskrit Club', 'Kannada Sangha', 'Health Club', 'Eco Club', 'NCC', 'Sports Club', 'Bugle Band Set', 'Girl Guide'],
-    competitiveExams: 'NMMS, CHARD GK, Hindi/Sanskrit exams, Ramayana & Mahabharata exams — up to ₹12,000 financial aid available',
+    competitiveExams: 'NMMS, CHARD GK, Hindi/Sanskrit exams, Ramayana & Mahabharata student assessments and merit awards.',
     admissionDocs: [
       'Original SATS Transfer Certificate (with PEN number and AAPAR Id)',
       'One passport-size photograph of the student',
