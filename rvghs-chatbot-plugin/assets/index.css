@@ -12,7 +12,7 @@
 }
 
 /* =========================================================
-   1. LAUNCHER - 3D POP-OUT WAVING GARUDA MASCOT (ACTIVE WHEN CLOSED)
+   1. LAUNCHER - 3D POP-OUT GARUDA WITH BACKGROUND COLOR POP WAVE
    ========================================================= */
 .chat-launcher {
   position: fixed !important;
@@ -35,10 +35,11 @@
 }
 
 .chat-launcher:hover {
-  transform: scale(1.12) !important;
+  transform: scale(1.1) !important;
+  animation-play-state: paused !important;
 }
 
-/* The White Circular Base with Continuous Radiant Wave Rings */
+/* The Background Color Pop: Glowing Purple Wave Pulse Rings */
 .chat-launcher::before {
   content: '' !important;
   position: absolute !important;
@@ -47,36 +48,30 @@
   background: #ffffff !important;
   border: 3.5px solid #800080 !important;
   z-index: 1 !important;
-  animation: rvs-wave-rings 2.5s cubic-bezier(0.2, 0.8, 0.4, 1) infinite !important;
+  animation: rvs-bg-color-pop 2.2s cubic-bezier(0.2, 0.8, 0.4, 1) infinite !important;
   transition: box-shadow 0.3s ease !important;
 }
 
 .chat-launcher:hover::before {
   animation-play-state: paused !important;
-  box-shadow: 0 0 0 12px rgba(128, 0, 128, 0.25), 0 10px 28px rgba(128, 0, 128, 0.7) !important;
+  box-shadow: 0 0 0 12px rgba(128, 0, 128, 0.3), 0 10px 28px rgba(128, 0, 128, 0.7) !important;
 }
 
-/* The Authentic Waving Garuda Figure (Plays Active Wave When Closed) */
+/* The Garuda Mascot Popping Out of the Base */
 .chat-launcher img.launcher-mascot {
   position: absolute !important;
-  width: 98px !important;
+  width: 96px !important;
   max-width: none !important;
-  height: 98px !important;
-  top: -22px !important;
+  height: 96px !important;
+  top: -20px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   object-fit: contain !important;
   z-index: 2 !important;
   pointer-events: none !important;
   display: block !important;
-  transform-origin: 45% 85% !important;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.22)) !important;
   transition: transform 0.2s ease !important;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2)) !important;
-  animation: rvs-garuda-waving-bounce 2.2s ease-in-out infinite !important;
-}
-
-.chat-launcher:hover img.launcher-mascot {
-  animation-duration: 1.2s !important;
 }
 
 .chat-launcher img.launcher-mascot.thinking-zoom {
@@ -85,47 +80,19 @@
 
 /* ── ANIMATION KEYFRAMES ── */
 
-/* 1. Continuous Energetic Hand & Body Waving Hello */
-@keyframes rvs-garuda-waving-bounce {
-  0% {
-    transform: translateX(-50%) rotate(0deg) scale(1) translateY(0);
-  }
-  15% {
-    transform: translateX(-50%) rotate(-14deg) scale(1.08) translateY(-4px);
-  }
-  30% {
-    transform: translateX(-50%) rotate(14deg) scale(1.12) translateY(-6px);
-  }
-  45% {
-    transform: translateX(-50%) rotate(-14deg) scale(1.12) translateY(-6px);
-  }
-  60% {
-    transform: translateX(-50%) rotate(12deg) scale(1.08) translateY(-4px);
-  }
-  75% {
-    transform: translateX(-50%) rotate(-8deg) scale(1.04) translateY(-2px);
-  }
-  90% {
-    transform: translateX(-50%) rotate(4deg) scale(1.02) translateY(-1px);
-  }
-  100% {
-    transform: translateX(-50%) rotate(0deg) scale(1) translateY(0);
-  }
-}
-
-/* 2. Concentric Dual Radiant Ripple Wave Rings */
-@keyframes rvs-wave-rings {
+/* 1. Radiant Background Color Pop Wave */
+@keyframes rvs-bg-color-pop {
   0% {
     box-shadow: 
-      0 0 0 0 rgba(128, 0, 128, 0.7),
+      0 0 0 0 rgba(128, 0, 128, 0.75),
       0 0 0 0 rgba(128, 0, 128, 0.4),
       0 4px 16px rgba(128, 0, 128, 0.4);
   }
   40% {
     box-shadow: 
-      0 0 0 14px rgba(128, 0, 128, 0.3),
+      0 0 0 14px rgba(128, 0, 128, 0.35),
       0 0 0 0 rgba(128, 0, 128, 0.4),
-      0 6px 20px rgba(128, 0, 128, 0.5);
+      0 6px 20px rgba(128, 0, 128, 0.6);
   }
   70% {
     box-shadow: 
@@ -141,13 +108,13 @@
   }
 }
 
-/* 3. Gentle Floating Levitation */
+/* 2. Gentle Floating Levitation */
 @keyframes rvs-float {
   0%, 100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-6px);
+    transform: translateY(-5px);
   }
 }
 

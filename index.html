@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RV Girls High School — Chatbot</title>
-  <link rel="stylesheet" href="index.css?v=3.0" />
+  <link rel="stylesheet" href="index.css?v=4.0" />
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <style>
-    /* Inlined Guaranteed Animation Styles (Bypasses Browser Cache) */
+    /* Inlined Background Color Pop Only */
     .chat-launcher {
       position: fixed !important;
       bottom: 24px !important;
@@ -35,65 +35,36 @@
       background: #ffffff !important;
       border: 3.5px solid #800080 !important;
       z-index: 1 !important;
-      animation: rvs-wave-rings 2.5s cubic-bezier(0.2, 0.8, 0.4, 1) infinite !important;
+      animation: rvs-bg-color-pop 2.2s cubic-bezier(0.2, 0.8, 0.4, 1) infinite !important;
     }
 
     .chat-launcher img.launcher-mascot {
       position: absolute !important;
-      width: 98px !important;
+      width: 96px !important;
       max-width: none !important;
-      height: 98px !important;
-      top: -22px !important;
+      height: 96px !important;
+      top: -20px !important;
       left: 50% !important;
       transform: translateX(-50%) !important;
       object-fit: contain !important;
       z-index: 2 !important;
       pointer-events: none !important;
       display: block !important;
-      transform-origin: 45% 85% !important;
-      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2)) !important;
-      animation: rvs-garuda-waving-bounce 2.2s ease-in-out infinite !important;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.22)) !important;
     }
 
-    @keyframes rvs-garuda-waving-bounce {
-      0% {
-        transform: translateX(-50%) rotate(0deg) scale(1) translateY(0);
-      }
-      15% {
-        transform: translateX(-50%) rotate(-14deg) scale(1.08) translateY(-4px);
-      }
-      30% {
-        transform: translateX(-50%) rotate(14deg) scale(1.12) translateY(-6px);
-      }
-      45% {
-        transform: translateX(-50%) rotate(-14deg) scale(1.12) translateY(-6px);
-      }
-      60% {
-        transform: translateX(-50%) rotate(12deg) scale(1.08) translateY(-4px);
-      }
-      75% {
-        transform: translateX(-50%) rotate(-8deg) scale(1.04) translateY(-2px);
-      }
-      90% {
-        transform: translateX(-50%) rotate(4deg) scale(1.02) translateY(-1px);
-      }
-      100% {
-        transform: translateX(-50%) rotate(0deg) scale(1) translateY(0);
-      }
-    }
-
-    @keyframes rvs-wave-rings {
+    @keyframes rvs-bg-color-pop {
       0% {
         box-shadow: 
-          0 0 0 0 rgba(128, 0, 128, 0.7),
+          0 0 0 0 rgba(128, 0, 128, 0.75),
           0 0 0 0 rgba(128, 0, 128, 0.4),
           0 4px 16px rgba(128, 0, 128, 0.4);
       }
       40% {
         box-shadow: 
-          0 0 0 14px rgba(128, 0, 128, 0.3),
+          0 0 0 14px rgba(128, 0, 128, 0.35),
           0 0 0 0 rgba(128, 0, 128, 0.4),
-          0 6px 20px rgba(128, 0, 128, 0.5);
+          0 6px 20px rgba(128, 0, 128, 0.6);
       }
       70% {
         box-shadow: 
@@ -111,7 +82,7 @@
 
     @keyframes rvs-float {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
+      50% { transform: translateY(-5px); }
     }
   </style>
 </head>
@@ -121,13 +92,13 @@
     <h1 style="color: #800080; margin-bottom: 12px;">Welcome to RV Girls High School</h1>
     <p style="color: #666; max-width: 600px; margin: 0 auto; line-height: 1.6;">
       Founded in 1962, empowering young women through holistic education.
-      Notice the lively waving Garuda figure with wave ripple animation in the bottom-right corner!
+      Notice the Garuda mascot with background color pop radiant glow animation in the bottom-right corner!
     </p>
   </div>
 
-  <!-- Floating Launcher with 3D Pop-Out Authentic Waving Garuda -->
+  <!-- Floating Launcher with 3D Pop-Out Garuda and Background Color Pop Wave -->
   <button class="chat-launcher" id="chatLauncher" title="Chat with us!">
-    <img src="garuda_waving.png?v=3.0" alt="Chat Mascot" class="launcher-mascot" id="launcherMascotImg">
+    <img src="garuda_waving.png?v=4.0" alt="Chat Mascot" class="launcher-mascot" id="launcherMascotImg">
   </button>
 
   <!-- Chat Widget -->
@@ -172,6 +143,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=3.0"></script>
+  <script src="app.js?v=4.0"></script>
 </body>
 </html>
