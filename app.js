@@ -746,17 +746,26 @@ function closeChat() {
 function formatText(text) {
   if (!text) return '';
   let formatted = text;
-  // Bold: *text*
-  formatted = formatted.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
-  // Markdown links: [Text](URL)
-  formatted = formatted.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color: #6F62F0; text-decoration: underline; font-weight: 600;">$1</a>');
-  // Bare links
-  formatted = formatted.replace(/(^|[^"'])((?:https?:\/\/|www\.)[^\s<]+)/g, (match, p1, p2) => {
-    const href = p2.startsWith('http') ? p2 : 'https://' + p2;
-    return p1 + `<a href="${href}" target="_blank" rel="noopener" style="color: #6F62F0; text-decoration: underline; font-weight: 600;">${p2}</a>`;
+
+  // 1. Protect Markdown links: [Text](URL)
+  const linkStore = [];
+  formatted = formatted.replace(/\[([^\]]+)\]\((https?:\/\/[^\)\s]+)\)/g, (match, label, url) => {
+    const placeholder = `___LINK_TOKEN_${linkStore.length}___`;
+    linkStore.push(`<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #800080; text-decoration: underline; font-weight: 700;">${label}</a>`);
+    return placeholder;
   });
-  // Newlines
+
+  // 2. Bold: *text*
+  formatted = formatted.replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+
+  // 3. Newlines
   formatted = formatted.replace(/\n/g, '<br>');
+
+  // 4. Restore protected links
+  linkStore.forEach((html, i) => {
+    formatted = formatted.replace(`___LINK_TOKEN_${i}___`, html);
+  });
+
   return formatted;
 }
 
