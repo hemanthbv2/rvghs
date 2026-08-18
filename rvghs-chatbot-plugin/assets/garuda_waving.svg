@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <style>
+    @keyframes svg-wave {
+      0%, 100% { transform: rotate(0deg); }
+      15% { transform: rotate(-14deg); }
+      30% { transform: rotate(14deg); }
+      45% { transform: rotate(-14deg); }
+      60% { transform: rotate(10deg); }
+      75% { transform: rotate(-5deg); }
+      90% { transform: rotate(0deg); }
+    }
+    .waving-character {
+      transform-origin: 230px 440px;
+      animation: svg-wave 2s ease-in-out infinite;
+    }
+  </style>
+  <g class="waving-character">
+    <animateTransform 
+      attributeName="transform" 
+      type="rotate" 
+      values="0 230 440; -14 230 440; 14 230 440; -14 230 440; 10 230 440; -5 230 440; 0 230 440" 
+      dur="2s" 
+      repeatCount="indefinite" 
+    />
+    <image href="garuda_waving.png" x="0" y="0" width="512" height="512" />
+  </g>
+</svg>
