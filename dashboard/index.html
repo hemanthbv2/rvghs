@@ -393,36 +393,35 @@
         async function fetchLogs() {
             let logs = [];
 
-            // 1. Try Vercel / Node backend API
+            // 1. Try Vercel Backend API (/api/logs)
             try {
-                if (window.API_URL || window.VERCEL_URL) {
-                    const nodeUrl = (window.API_URL || window.VERCEL_URL).replace(/\/+$/, '') + '/api/logs';
-                    const res = await fetch(nodeUrl, { signal: AbortSignal.timeout(2500) });
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data.ok && Array.isArray(data.logs) && data.logs.length > 0) {
-                            return data.logs.map(normalizeLog);
-                        }
-                    }
-                }
-            } catch (e) {
-                // Node server not reachable, fallback to next source
-            }
-
-            // 2. Try WordPress REST API
-            try {
-                const wpUrl = window.WP_REST_URL 
-                    ? (window.WP_REST_URL.replace(/\/+$/, '') + '/interactions') 
-                    : (window.location.origin + '/wp-json/rvghs/v1/interactions');
-                const res = await fetch(wpUrl, { signal: AbortSignal.timeout(2500) });
+                const nodeUrl = window.API_URL ? (window.API_URL.replace(/\/+$/, '') + '/api/logs') : '/api/logs';
+                const res = await fetch(nodeUrl, { signal: AbortSignal.timeout(2500) });
                 if (res.ok) {
                     const data = await res.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        return data.map(normalizeLog);
+                    if (data.ok && Array.isArray(data.logs) && data.logs.length > 0) {
+                        return data.logs.map(normalizeLog);
                     }
                 }
-            } catch (e) {
-                // WP REST API not reachable, fallback to next source
+            } catch (e) {}
+
+            // 2. Try WordPress REST API (Injected WP_REST_URL, Localhost, or Live rvghs.edu.in)
+            const wpEndpoints = [
+                window.WP_REST_URL ? (window.WP_REST_URL.replace(/\/+$/, '') + '/interactions') : null,
+                (!window.location.origin.includes('vercel.app')) ? (window.location.origin + '/wp-json/rvghs/v1/interactions') : null,
+                'https://rvghs.edu.in/wp-json/rvghs/v1/interactions'
+            ].filter(Boolean);
+
+            for (const url of wpEndpoints) {
+                try {
+                    const res = await fetch(url, { signal: AbortSignal.timeout(3000) });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (Array.isArray(data) && data.length > 0) {
+                            return data.map(normalizeLog);
+                        }
+                    }
+                } catch (err) {}
             }
 
             // 3. Try LocalStorage
