@@ -395,12 +395,14 @@
 
             // 1. Try Vercel / Node backend API
             try {
-                const nodeUrl = (window.API_URL || (window.location.origin.includes('localhost') ? 'http://localhost:5000' : '')) + '/api/logs';
-                const res = await fetch(nodeUrl, { signal: AbortSignal.timeout(2000) });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.ok && Array.isArray(data.logs) && data.logs.length > 0) {
-                        return data.logs.map(normalizeLog);
+                if (window.API_URL || window.VERCEL_URL) {
+                    const nodeUrl = (window.API_URL || window.VERCEL_URL).replace(/\/+$/, '') + '/api/logs';
+                    const res = await fetch(nodeUrl, { signal: AbortSignal.timeout(2500) });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.ok && Array.isArray(data.logs) && data.logs.length > 0) {
+                            return data.logs.map(normalizeLog);
+                        }
                     }
                 }
             } catch (e) {
@@ -409,10 +411,10 @@
 
             // 2. Try WordPress REST API
             try {
-                const wpUrl = (window.location.origin.includes('localhost') || window.location.origin.includes('http')) 
-                    ? (window.location.origin + '/wp-json/rvghs/v1/interactions') 
-                    : '/wp-json/rvghs/v1/interactions';
-                const res = await fetch(wpUrl, { signal: AbortSignal.timeout(2000) });
+                const wpUrl = window.WP_REST_URL 
+                    ? (window.WP_REST_URL.replace(/\/+$/, '') + '/interactions') 
+                    : (window.location.origin + '/wp-json/rvghs/v1/interactions');
+                const res = await fetch(wpUrl, { signal: AbortSignal.timeout(2500) });
                 if (res.ok) {
                     const data = await res.json();
                     if (Array.isArray(data) && data.length > 0) {
@@ -425,7 +427,7 @@
 
             // 3. Try LocalStorage
             try {
-                const local = localStorage.getItem('rvghs_logs') || localStorage.getItem('rvce_standalone_logs');
+                const local = localStorage.getItem('rvghs_logs');
                 if (local) {
                     const parsed = JSON.parse(local);
                     if (Array.isArray(parsed) && parsed.length > 0) {
@@ -729,9 +731,29 @@
             document.getElementById('frustrationIndex').textContent = rate + '%';
         }
 
-        function generateTestData() {
+        async function generateTestData() {
             const mock = getInitialSeedData();
             localStorage.setItem('rvghs_logs', JSON.stringify(mock));
+
+            // If in WordPress, also POST mock events to the REST API so MySQL has records
+            try {
+                const restUrl = window.WP_REST_URL 
+                    ? (window.WP_REST_URL.replace(/\/+$/, '') + '/logs') 
+                    : (window.location.origin + '/wp-json/rvghs/v1/logs');
+                const payload = {
+                    sessionId: 'sid_seed_' + Date.now().toString(36),
+                    events: mock.map(m => ({
+                        eventType: m.t || 'message',
+                        data: { elementId: m.i, query: m.q, elementText: m.q }
+                    }))
+                };
+                await fetch(restUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch(e) {}
+
             render();
         }
 

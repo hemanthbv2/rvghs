@@ -158,12 +158,37 @@ function rvghs_chatbot_render_dashboard_tab() {
     }
 
     $file_path = RVGHS_CHATBOT_DIR_PATH . 'dashboard/' . $tab . '.html';
-    $file_path_php = RVGHS_CHATBOT_DIR_PATH . 'dashboard/' . $tab . '.php';
 
-    if (file_exists($file_path_php)) {
-        include $file_path_php;
-    } elseif (file_exists($file_path)) {
-        readfile($file_path);
+    if (file_exists($file_path)) {
+        $html = file_get_contents($file_path);
+
+        // Inject dynamic runtime configuration
+        $rest_url = esc_url_raw(rest_url('rvghs/v1'));
+        $vercel_url = esc_url_raw(get_option('rvghs_chatbot_vercel_url', ''));
+        $injected_config = "<script>
+            window.WP_REST_URL = '{$rest_url}';
+            window.VERCEL_URL = '{$vercel_url}';
+            window.API_URL = '{$vercel_url}';
+            window.IS_WP_ADMIN = true;
+        </script>";
+
+        $html = str_replace('<head>', '<head>' . "\n" . $injected_config, $html);
+
+        // Map sidebar navigation links to admin-post.php tabs inside WordPress
+        $index_url = admin_url('admin-post.php?action=rvghs_chatbot_dashboard_view&tab=index');
+        $interactions_url = admin_url('admin-post.php?action=rvghs_chatbot_dashboard_view&tab=interactions');
+        $sessions_url = admin_url('admin-post.php?action=rvghs_chatbot_dashboard_view&tab=sessions');
+        $analytics_url = admin_url('admin-post.php?action=rvghs_chatbot_dashboard_view&tab=analytics');
+        $leads_url = admin_url('admin-post.php?action=rvghs_chatbot_dashboard_view&tab=leads');
+
+        $html = str_replace('href="/dashboard"', 'href="' . esc_url($index_url) . '"', $html);
+        $html = str_replace('href="/dashboard/interactions"', 'href="' . esc_url($interactions_url) . '"', $html);
+        $html = str_replace('href="/dashboard/sessions"', 'href="' . esc_url($sessions_url) . '"', $html);
+        $html = str_replace('href="/dashboard/analytics"', 'href="' . esc_url($analytics_url) . '"', $html);
+        $html = str_replace('href="/dashboard/leads"', 'href="' . esc_url($leads_url) . '"', $html);
+
+        header('Content-Type: text/html; charset=utf-8');
+        echo $html;
     } else {
         // Fallback Native Overview
         rvghs_chatbot_render_native_dashboard_fallback();
