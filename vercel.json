@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/rvghs/dashboard/:match*",
+      "destination": "/dashboard/:match*"
+    },
+    {
+      "source": "/rvghs/dashboard",
+      "destination": "/dashboard/index.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard/index.html"
+    }
+  ]
+}

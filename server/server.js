@@ -11,22 +11,46 @@ const PORT = process.env.PORT || 5000;
 app.use(cors()); // Allow requests from any origin
 app.use(express.json({ limit: '5mb' })); // Parse JSON bodies
 
-// ===== MONGODB CONNECTION =====
-if (process.env.MONGODB_URI) {
-    mongoose.connect(process.env.MONGODB_URI)
-        .then(() => console.log('✅ Connected to MongoDB Atlas'))
-        .catch(err => {
+// ===== MONGODB CONNECTION (Serverless Optimized) =====
+let cachedDbPromise = null;
+
+async function connectToDatabase() {
+    if (!process.env.MONGODB_URI) return null;
+    if (mongoose.connection.readyState === 1) return mongoose.connection;
+    
+    if (!cachedDbPromise) {
+        cachedDbPromise = mongoose.connect(process.env.MONGODB_URI, {
+            bufferCommands: false,
+        }).then((m) => {
+            console.log('✅ Connected to MongoDB Atlas');
+            return m;
+        }).catch(err => {
+            cachedDbPromise = null;
             console.error('❌ MongoDB connection error:', err.message);
+            return null;
         });
-} else {
-    console.warn('⚠️ MONGODB_URI not set. Running in offline/mock mode.');
+    }
+    return cachedDbPromise;
 }
+
+// Auto-connect middleware for all API routes
+app.use(async (req, res, next) => {
+    try {
+        await connectToDatabase();
+    } catch (e) {}
+    next();
+});
 
 // ===== API ROUTES =====
 
 // Health check
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'online', db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
+    const isConnected = mongoose.connection.readyState === 1;
+    res.json({ 
+        status: 'online', 
+        db: isConnected ? 'connected' : 'disconnected',
+        hasMongoUri: !!process.env.MONGODB_URI
+    });
 });
 
 // Setup endpoint (per chatbot_architecture skill)

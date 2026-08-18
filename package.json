@@ -1,0 +1,16 @@
+{
+  "name": "rvghs-chatbot-fullstack",
+  "version": "3.0.0",
+  "description": "RVGHS Chatbot Frontend, Command Center Dashboard, and MongoDB Node.js Backend",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.4.1"
+  }
+}
