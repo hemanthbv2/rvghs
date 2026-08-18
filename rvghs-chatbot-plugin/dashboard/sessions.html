@@ -125,15 +125,45 @@ function downloadSessionPDF(event, btn) {
     }, 100);
 }
 
-const API_BASE = 'http://localhost:5000/api';
+async function fetchLogs() {
+    // 1. Try Vercel / Node backend
+    try {
+        const nodeUrl = (window.API_URL || '') + '/api/logs';
+        if (window.API_URL) {
+            const res = await fetch(nodeUrl, { signal: AbortSignal.timeout(2500) });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.ok && Array.isArray(data.logs) && data.logs.length > 0) return data.logs;
+            }
+        }
+    } catch(e) {}
+
+    // 2. Try WordPress REST API
+    try {
+        const wpUrl = (window.location.origin.includes('http')) 
+            ? (window.location.origin + '/wp-json/rvghs/v1/interactions')
+            : '/wp-json/rvghs/v1/interactions';
+        const res = await fetch(wpUrl, { signal: AbortSignal.timeout(2500) });
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) return data;
+        }
+    } catch(e) {}
+
+    // 3. Try LocalStorage
+    try {
+        const local = localStorage.getItem('rvghs_logs');
+        if (local) {
+            const parsed = JSON.parse(local);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+    } catch(e) {}
+
+    return [];
+}
 
 async function render() {
-    let logs = [];
-    try {
-        const res = await fetch(`${API_BASE}/logs`);
-        const data = await res.json();
-        if(data.ok) logs = data.logs;
-    } catch (err) { console.error(err); }
+    let logs = await fetchLogs();
 
 const sessions={};
 logs.forEach(l=>{if(!l.s)return;if(!sessions[l.s])sessions[l.s]=[];sessions[l.s].push(l);});
