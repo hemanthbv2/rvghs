@@ -244,6 +244,257 @@ function rvghs_chatbot_render_native_dashboard_fallback() {
 
 /**
  * =========================================================================
+ * REST API ENDPOINTS FOR TELEMETRY & DASHBOARD
+ * =========================================================================
+ */
+add_action('rest_api_init', 'rvghs_chatbot_register_rest_routes');
+
+function rvghs_chatbot_register_rest_routes() {
+    // 1. POST /wp-json/rvghs/v1/logs (Receives batched telemetry from frontend)
+    register_rest_route('rvghs/v1', '/logs', array(
+        'methods'             => array('POST', 'OPTIONS'),
+        'callback'            => 'rvghs_chatbot_rest_save_logs',
+        'permission_callback' => '__return_true',
+    ));
+
+    // 2. GET /wp-json/rvghs/v1/interactions (Returns interaction logs to dashboard)
+    register_rest_route('rvghs/v1', '/interactions', array(
+        'methods'             => array('GET', 'OPTIONS'),
+        'callback'            => 'rvghs_chatbot_rest_get_interactions',
+        'permission_callback' => '__return_true',
+    ));
+
+    // 3. GET /wp-json/rvghs/v1/logs (Alias for interactions)
+    register_rest_route('rvghs/v1', '/logs', array(
+        'methods'             => 'GET',
+        'callback'            => 'rvghs_chatbot_rest_get_interactions',
+        'permission_callback' => '__return_true',
+    ));
+
+    // 4. POST /wp-json/rvghs/v1/leads (Receives leads)
+    register_rest_route('rvghs/v1', '/leads', array(
+        'methods'             => array('POST', 'OPTIONS'),
+        'callback'            => 'rvghs_chatbot_rest_save_lead',
+        'permission_callback' => '__return_true',
+    ));
+
+    // 5. GET /wp-json/rvghs/v1/leads (Returns leads to dashboard)
+    register_rest_route('rvghs/v1', '/leads', array(
+        'methods'             => 'GET',
+        'callback'            => 'rvghs_chatbot_rest_get_leads',
+        'permission_callback' => '__return_true',
+    ));
+
+    // 6. GET /wp-json/rvghs/v1/stats (Aggregated metrics)
+    register_rest_route('rvghs/v1', '/stats', array(
+        'methods'             => 'GET',
+        'callback'            => 'rvghs_chatbot_rest_get_stats',
+        'permission_callback' => '__return_true',
+    ));
+}
+
+// Enable CORS for all RVGHS REST API calls
+add_filter('rest_pre_serve_request', function($value) {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+    return $value;
+});
+
+/**
+ * REST Handler: Save Batched Logs
+ */
+function rvghs_chatbot_rest_save_logs(WP_REST_Request $request) {
+    global $wpdb;
+    rvghs_chatbot_ensure_tables_exist();
+
+    $params = $request->get_json_params();
+    if (empty($params)) {
+        $params = json_decode($request->get_body(), true);
+    }
+
+    if (empty($params) || !is_array($params)) {
+        return new WP_REST_Response(array('success' => false, 'message' => 'Invalid JSON body'), 400);
+    }
+
+    $session_id = isset($params['sessionId']) ? sanitize_text_field($params['sessionId']) : 'sid_anon';
+    $events = isset($params['events']) && is_array($params['events']) ? $params['events'] : array();
+    $table_interactions = $wpdb->prefix . 'rvghs_interactions';
+    $saved_count = 0;
+
+    foreach ($events as $event) {
+        $event_type = isset($event['eventType']) ? sanitize_text_field($event['eventType']) : 'message';
+        $data = isset($event['data']) && is_array($event['data']) ? $event['data'] : array();
+
+        $interaction_id = isset($data['elementId']) ? sanitize_text_field($data['elementId']) : 
+                          (isset($data['intent']) ? sanitize_text_field($data['intent']) : 
+                          (isset($event['intent']) ? sanitize_text_field($event['intent']) : ''));
+
+        $query_text = isset($data['elementText']) ? sanitize_text_field($data['elementText']) : 
+                      (isset($data['query']) ? sanitize_text_field($data['query']) : 
+                      (isset($event['query']) ? sanitize_text_field($event['query']) : ''));
+
+        $meta_data_json = wp_json_encode($data);
+
+        $inserted = $wpdb->insert(
+            $table_interactions,
+            array(
+                'session_id'     => $session_id,
+                'event_type'     => $event_type,
+                'interaction_id' => $interaction_id,
+                'query_text'     => $query_text,
+                'meta_data'      => $meta_data_json,
+                'created_at'     => current_time('mysql', 1)
+            ),
+            array('%s', '%s', '%s', '%s', '%s', '%s')
+        );
+
+        if ($inserted) {
+            $saved_count++;
+        }
+    }
+
+    // Forward to Vercel MongoDB backend if configured
+    $vercel_url = get_option('rvghs_chatbot_vercel_url', '');
+    if (!empty($vercel_url)) {
+        $vercel_endpoint = rtrim($vercel_url, '/') . '/api/logs';
+        wp_remote_post($vercel_endpoint, array(
+            'headers'     => array('Content-Type' => 'application/json'),
+            'body'        => wp_json_encode($params),
+            'timeout'     => 3,
+            'blocking'    => false
+        ));
+    }
+
+    return new WP_REST_Response(array(
+        'success' => true,
+        'saved'   => $saved_count,
+        'total'   => count($events)
+    ), 200);
+}
+
+/**
+ * REST Handler: Get Interactions
+ */
+function rvghs_chatbot_rest_get_interactions(WP_REST_Request $request) {
+    global $wpdb;
+    rvghs_chatbot_ensure_tables_exist();
+
+    $table_interactions = $wpdb->prefix . 'rvghs_interactions';
+    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 500;
+    if ($limit <= 0 || $limit > 1000) $limit = 500;
+
+    $rows = $wpdb->get_results(
+        $wpdb->prepare("SELECT * FROM $table_interactions ORDER BY created_at DESC LIMIT %d", $limit),
+        ARRAY_A
+    );
+
+    $logs = array();
+    if (!empty($rows)) {
+        foreach ($rows as $row) {
+            $meta = !empty($row['meta_data']) ? json_decode($row['meta_data'], true) : new stdClass();
+            $logs[] = array(
+                'id'             => (int) $row['id'],
+                '_id'            => (string) $row['id'],
+                'session_id'     => $row['session_id'],
+                'sessionId'      => $row['session_id'],
+                's'              => $row['session_id'],
+                'event_type'     => $row['event_type'],
+                'eventType'      => $row['event_type'],
+                't'              => $row['event_type'],
+                'interaction_id' => $row['interaction_id'],
+                'i'              => $row['interaction_id'],
+                'query_text'     => $row['query_text'],
+                'q'              => $row['query_text'],
+                'meta_data'      => $meta,
+                'm'              => $meta,
+                'created_at'     => $row['created_at'],
+                'timestamp'      => $row['created_at'],
+                'd'              => $row['created_at'],
+            );
+        }
+    }
+
+    return new WP_REST_Response($logs, 200);
+}
+
+/**
+ * REST Handler: Save Lead
+ */
+function rvghs_chatbot_rest_save_lead(WP_REST_Request $request) {
+    global $wpdb;
+    rvghs_chatbot_ensure_tables_exist();
+
+    $params = $request->get_json_params();
+    if (empty($params)) {
+        $params = json_decode($request->get_body(), true);
+    }
+
+    $session_id = isset($params['sessionId']) ? sanitize_text_field($params['sessionId']) : 'sid_anon';
+    $lead_data = isset($params['leadData']) ? $params['leadData'] : $params;
+
+    $table_leads = $wpdb->prefix . 'rvghs_leads';
+    $wpdb->insert(
+        $table_leads,
+        array(
+            'session_id' => $session_id,
+            'lead_data'  => wp_json_encode($lead_data),
+            'created_at' => current_time('mysql', 1)
+        ),
+        array('%s', '%s', '%s')
+    );
+
+    return new WP_REST_Response(array('success' => true), 200);
+}
+
+/**
+ * REST Handler: Get Leads
+ */
+function rvghs_chatbot_rest_get_leads(WP_REST_Request $request) {
+    global $wpdb;
+    rvghs_chatbot_ensure_tables_exist();
+
+    $table_leads = $wpdb->prefix . 'rvghs_leads';
+    $rows = $wpdb->get_results("SELECT * FROM $table_leads ORDER BY created_at DESC LIMIT 200", ARRAY_A);
+
+    $leads = array();
+    if (!empty($rows)) {
+        foreach ($rows as $row) {
+            $leads[] = array(
+                'id'         => (int) $row['id'],
+                'session_id' => $row['session_id'],
+                'lead_data'  => json_decode($row['lead_data'], true),
+                'created_at' => $row['created_at']
+            );
+        }
+    }
+
+    return new WP_REST_Response($leads, 200);
+}
+
+/**
+ * REST Handler: Get Stats
+ */
+function rvghs_chatbot_rest_get_stats(WP_REST_Request $request) {
+    global $wpdb;
+    rvghs_chatbot_ensure_tables_exist();
+
+    $table_interactions = $wpdb->prefix . 'rvghs_interactions';
+    $table_leads = $wpdb->prefix . 'rvghs_leads';
+
+    $total_interactions = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_interactions");
+    $total_sessions = (int) $wpdb->get_var("SELECT COUNT(DISTINCT session_id) FROM $table_interactions");
+    $total_leads = (int) $wpdb->get_var("SELECT COUNT(*) FROM $table_leads");
+
+    return new WP_REST_Response(array(
+        'total_interactions' => $total_interactions,
+        'total_sessions'     => $total_sessions,
+        'total_leads'        => $total_leads
+    ), 200);
+}
+
+/**
+ * =========================================================================
  * 3. ADMIN SETTINGS REGISTRATION & RENDERING
  * =========================================================================
  */

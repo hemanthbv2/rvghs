@@ -125,12 +125,30 @@
         if (!batch || batch.length === 0) return;
         const { wpRestUrl, vercelUrl } = getEndpoints();
         
-        const payload = JSON.stringify({ 
+        const payloadObj = { 
             institute_id: 'rvghs',
             api_key: 'rvghs_key_12345',
             sessionId: SESSION_ID, 
             events: batch 
-        });
+        };
+        const payload = JSON.stringify(payloadObj);
+
+        // Also save to LocalStorage for zero-latency local dashboard view
+        try {
+            const existingRaw = localStorage.getItem('rvghs_logs');
+            let existing = existingRaw ? JSON.parse(existingRaw) : [];
+            if (!Array.isArray(existing)) existing = [];
+            const newEntries = batch.map(e => ({
+                s: SESSION_ID,
+                d: e.timestamp || new Date().toISOString(),
+                t: e.eventType || 'message',
+                i: e.data?.elementId || e.data?.intent || '',
+                q: e.data?.elementText || e.data?.query || '',
+                m: e.data || {}
+            }));
+            const updated = [...newEntries, ...existing].slice(0, 1000);
+            localStorage.setItem('rvghs_logs', JSON.stringify(updated));
+        } catch(err){}
 
         const requests = [];
 
@@ -147,7 +165,6 @@
                     if (!r.ok) throw new Error('WP HTTP ' + r.status); 
                 })
                 .catch(e => {
-                    // Fail silently or debug log
                     if (window.console && console.debug) console.debug('[RVGHS Telemetry] WP log note:', e.message);
                 })
             );
