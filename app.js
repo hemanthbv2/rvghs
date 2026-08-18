@@ -723,12 +723,12 @@ function openChat(schoolId) {
       scrollToBottom();
   } else {
       chatContainer.innerHTML = '';
-      // Send welcome after brief delay
+      // Display welcome hero screen for exactly 3 seconds (3000ms)
       setTimeout(() => {
         const hs = document.getElementById('rvghs-hero-screen');
         if (hs) hs.classList.add('fade-out');
         sendBotMessage('welcome');
-      }, 800);
+      }, 3000);
   }
 
   if (chatWidget) chatWidget.classList.add('active');
@@ -1098,7 +1098,7 @@ function initChatbot() {
         setTimeout(() => {
           if (hs) hs.classList.add('fade-out');
           sendBotMessage('welcome');
-        }, 800);
+        }, 3000);
       }
     });
   }
