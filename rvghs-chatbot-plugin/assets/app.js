@@ -216,6 +216,7 @@ function buildTree(s) {
     if (schoolId === 'rvghs') {
       base.push({ label: '🍱 Mid-day Meals', node: 'midday' });
       base.push({ label: '🎯 Clubs & NCC', node: 'clubs' });
+      base.push({ label: '❤️ Support & Donate', node: 'donate' });
     }
     if (schoolId === 'rvs') {
       base.splice(4, 0, { label: '💰 Fee Structure', node: 'fees' });
@@ -500,7 +501,10 @@ function buildTree(s) {
       },
       contact: {
         message: `📞 Contact RV Girls High School\n\n📍 *Address*: ${s.address}\n📞 *Phone*: ${s.phone}\n📧 *Email*: ${s.email}\n🌐 *Website*: [rvghs.edu.in](${s.website})\n🕐 *Hours*: ${s.officeHours}`,
-        options: [backOption],
+        options: [
+          { label: '❤️ Support & Donate', node: 'donate' },
+          backOption,
+        ],
       },
     };
   }
