@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RV Girls High School — Chatbot</title>
-  <link rel="stylesheet" href="index.css?v=4.0" />
+  <link rel="stylesheet" href="index.css?v=5.0" />
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <style>
-    /* Inlined Background Color Pop Only */
+    /* 3D Pop-Out Original Garuda with Background Pop Circle Animation Only */
     .chat-launcher {
       position: fixed !important;
       bottom: 24px !important;
@@ -25,8 +25,15 @@
       align-items: center !important;
       justify-content: center !important;
       animation: rvs-float 3.2s ease-in-out infinite !important;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
     }
 
+    .chat-launcher:hover {
+      transform: scale(1.1) !important;
+      animation-play-state: paused !important;
+    }
+
+    /* The Background Pop Circle: Radiant Purple Wave Pulse Rings */
     .chat-launcher::before {
       content: '' !important;
       position: absolute !important;
@@ -35,9 +42,16 @@
       background: #ffffff !important;
       border: 3.5px solid #800080 !important;
       z-index: 1 !important;
-      animation: rvs-bg-color-pop 2.2s cubic-bezier(0.2, 0.8, 0.4, 1) infinite !important;
+      animation: rvs-bg-pop-circle 2.2s cubic-bezier(0.2, 0.8, 0.4, 1) infinite !important;
+      transition: box-shadow 0.3s ease !important;
     }
 
+    .chat-launcher:hover::before {
+      animation-play-state: paused !important;
+      box-shadow: 0 0 0 12px rgba(128, 0, 128, 0.3), 0 10px 28px rgba(128, 0, 128, 0.7) !important;
+    }
+
+    /* Perfect Original Garuda Head (No Hand, Pure Head Pop-Out) */
     .chat-launcher img.launcher-mascot {
       position: absolute !important;
       width: 96px !important;
@@ -51,19 +65,25 @@
       pointer-events: none !important;
       display: block !important;
       filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.22)) !important;
+      transition: transform 0.2s ease !important;
     }
 
-    @keyframes rvs-bg-color-pop {
+    .chat-launcher img.launcher-mascot.thinking-zoom {
+      transform: translateX(-50%) scale(1.15) !important;
+    }
+
+    /* Background Pop Circle Pulse */
+    @keyframes rvs-bg-pop-circle {
       0% {
         box-shadow: 
-          0 0 0 0 rgba(128, 0, 128, 0.75),
-          0 0 0 0 rgba(128, 0, 128, 0.4),
+          0 0 0 0 rgba(128, 0, 128, 0.8),
+          0 0 0 0 rgba(128, 0, 128, 0.45),
           0 4px 16px rgba(128, 0, 128, 0.4);
       }
       40% {
         box-shadow: 
           0 0 0 14px rgba(128, 0, 128, 0.35),
-          0 0 0 0 rgba(128, 0, 128, 0.4),
+          0 0 0 0 rgba(128, 0, 128, 0.45),
           0 6px 20px rgba(128, 0, 128, 0.6);
       }
       70% {
@@ -80,6 +100,7 @@
       }
     }
 
+    /* Subtle Levitation Float */
     @keyframes rvs-float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-5px); }
@@ -92,13 +113,13 @@
     <h1 style="color: #800080; margin-bottom: 12px;">Welcome to RV Girls High School</h1>
     <p style="color: #666; max-width: 600px; margin: 0 auto; line-height: 1.6;">
       Founded in 1962, empowering young women through holistic education.
-      Notice the Garuda mascot with background color pop radiant glow animation in the bottom-right corner!
+      Notice the original Garuda mascot with glowing background pop circle animation in the bottom-right corner!
     </p>
   </div>
 
-  <!-- Floating Launcher with 3D Pop-Out Garuda and Background Color Pop Wave -->
+  <!-- Floating Launcher with 3D Pop-Out Original Garuda Head & Background Pop Circle -->
   <button class="chat-launcher" id="chatLauncher" title="Chat with us!">
-    <img src="garuda_waving.png?v=4.0" alt="Chat Mascot" class="launcher-mascot" id="launcherMascotImg">
+    <img src="garuda_head.png?v=5.0" alt="Chat Mascot" class="launcher-mascot" id="launcherMascotImg">
   </button>
 
   <!-- Chat Widget -->
@@ -143,6 +164,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=4.0"></script>
+  <script src="app.js?v=5.0"></script>
 </body>
 </html>

@@ -1013,10 +1013,10 @@ function initChatbot() {
   const typeahead = document.getElementById('typeahead');
   const micBtn = document.getElementById('micBtn');
 
-  // Immediately ensure launcher mascot displays garuda_waving.png
+  // Immediately ensure launcher mascot displays garuda_head.png
   const mascotImg = document.getElementById('launcherMascotImg');
   if (mascotImg) {
-    mascotImg.src = getAssetUrl('garuda_waving.png');
+    mascotImg.src = getAssetUrl('garuda_head.png');
   }
 
   // Multi-school card clicks (if demo page)
@@ -1045,13 +1045,12 @@ function initChatbot() {
     });
   }
 
-  // Waving animation trigger when chat is closed
+  // Waving / resting trigger when chat is closed
   function triggerWavingOnClose() {
     const mascotImg = document.getElementById('launcherMascotImg');
     if (mascotImg) {
-      mascotImg.src = getAssetUrl('garuda_waving.png');
+      mascotImg.src = getAssetUrl('garuda_head.png');
       mascotImg.classList.remove('thinking-zoom');
-      mascotImg.classList.add('waving-animate');
     }
   }
 
@@ -1067,7 +1066,7 @@ function initChatbot() {
         mascotImg.src = getAssetUrl('garuda_head_thinking.png');
         mascotImg.classList.add('thinking-zoom');
         setTimeout(() => {
-          mascotImg.src = getAssetUrl('garuda_waving.png');
+          mascotImg.src = getAssetUrl('garuda_head.png');
           mascotImg.classList.remove('thinking-zoom');
           openChat('rvghs');
         }, 300);

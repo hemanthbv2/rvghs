@@ -705,7 +705,7 @@ function rvghs_chatbot_render_footer_html() {
     $logo_url = trim(get_option('rvghs_chatbot_logo_url', '')) ? trim(get_option('rvghs_chatbot_logo_url', '')) : $default_logo;
     $title = get_option('rvghs_chatbot_title', 'RV Girls High School');
     $status_text = get_option('rvghs_chatbot_status_text', 'Online - Ready to help');
-    $mascot_url = RVGHS_CHATBOT_DIR_URL . 'assets/garuda_waving.png';
+    $mascot_url = RVGHS_CHATBOT_DIR_URL . 'assets/garuda_head.png';
     $hero_mascot_url = RVGHS_CHATBOT_DIR_URL . 'assets/mascot_v2.png';
     ?>
     <!-- RVGHS Floating Chat Launcher -->
