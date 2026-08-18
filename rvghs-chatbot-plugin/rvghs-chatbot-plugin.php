@@ -3,7 +3,7 @@
  * Plugin Name: RVGHS Chatbot
  * Plugin URI: https://rvghs.edu.in
  * Description: Interactive AI Chatbot for RV Girls High School with Dual-Write Telemetry (WordPress MySQL + Vercel MongoDB Command Center).
- * Version: 2.3.0
+ * Version: 2.5.0
  * Author: Hemanth BV
  * Author URI: https://rvghs.edu.in
  * License: GPL-2.0+
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define Constants
-define('RVGHS_CHATBOT_VERSION', '2.3.0');
+define('RVGHS_CHATBOT_VERSION', '2.5.0');
 define('RVGHS_CHATBOT_DIR_PATH', plugin_dir_path(__FILE__));
 define('RVGHS_CHATBOT_DIR_URL', plugin_dir_url(__FILE__));
 
@@ -708,6 +708,17 @@ function rvghs_chatbot_render_footer_html() {
     $mascot_url = RVGHS_CHATBOT_DIR_URL . 'assets/garuda_head.png';
     $hero_mascot_url = RVGHS_CHATBOT_DIR_URL . 'assets/mascot_v2.png';
     ?>
+    <style id="rvghs-launcher-direct-styles">
+        .chat-launcher::before {
+            animation: rvs-bg-pop-circle 2.2s cubic-bezier(0.2, 0.8, 0.4, 1) infinite !important;
+        }
+        @keyframes rvs-bg-pop-circle {
+            0% { box-shadow: 0 0 0 0 rgba(128, 0, 128, 0.85), 0 0 0 0 rgba(128, 0, 128, 0.5), 0 4px 16px rgba(128, 0, 128, 0.4); }
+            40% { box-shadow: 0 0 0 14px rgba(128, 0, 128, 0.4), 0 0 0 0 rgba(128, 0, 128, 0.5), 0 6px 22px rgba(128, 0, 128, 0.65); }
+            70% { box-shadow: 0 0 0 28px rgba(128, 0, 128, 0), 0 0 0 14px rgba(128, 0, 128, 0.3), 0 8px 24px rgba(128, 0, 128, 0.5); }
+            100% { box-shadow: 0 0 0 38px rgba(128, 0, 128, 0), 0 0 0 28px rgba(128, 0, 128, 0), 0 4px 16px rgba(128, 0, 128, 0.4); }
+        }
+    </style>
     <!-- RVGHS Floating Chat Launcher -->
     <button class="chat-launcher" id="chatLauncher" title="<?php esc_attr_e('Chat with us!', 'rvghs-chatbot'); ?>" aria-label="<?php esc_attr_e('Open Chat', 'rvghs-chatbot'); ?>" type="button">
         <img src="<?php echo esc_url($mascot_url); ?>" alt="Chat Mascot" class="launcher-mascot" id="launcherMascotImg">
